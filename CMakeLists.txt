@@ -21,7 +21,9 @@ add_executable(COP3530_Final_Project_MST
         MSTBuilder.cpp
         MSTBuilder.h
         UIController.cpp
-        UIController.h)
+        UIController.h
+        TextInputBox.cpp
+        TextInputBox.h)
 
 target_link_libraries(COP3530_Final_Project_MST sfml-system sfml-window sfml-graphics)
 
