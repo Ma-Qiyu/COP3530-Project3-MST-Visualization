@@ -324,7 +324,7 @@ void UIController::update() {
         timeText.setString("Execution Time: " + to_string(mstResult.exeTimeMs) + " us");
         edgeCountText.setString("Edge Count: " + to_string(mstResult.mstEdges.size()));
     } else {
-        // If regenerate the graph, clear the statistics.
+        // If regenerate the graph, clear the statistics
         algorithmText.setString("Algorithm: --");
         weightText.setString("Total Weight: --");
         timeText.setString("Execution Time: --");
