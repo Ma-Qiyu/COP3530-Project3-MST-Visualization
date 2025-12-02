@@ -323,7 +323,7 @@ void UIController::update() {
         weightText.setString("Total Weight: " + weightStr.substr(0, weightStr.find('.') + 3));
         timeText.setString("Execution Time: " + to_string(mstResult.exeTimeMs) + " us");
         edgeCountText.setString("Edge Count: " + to_string(mstResult.mstEdges.size()));
-    } else if (currentState != AppState::ANIMATING) {
+    } else {
         // If regenerate the graph, clear the statistics
         algorithmText.setString("Algorithm: --");
         weightText.setString("Total Weight: --");
@@ -354,24 +354,43 @@ void UIController::render() {
         }
     }
 
-    if (currentState == AppState::ANIMATING || currentState == AppState::FINISHED) {
+    if (currentState == AppState::ANIMATING) {
         // Set accepted edges cyan
         for (size_t i = 0; i < currentStepIndex; ++i) {
             const auto& step = animationSteps[i];
             if (step.action == StepAction::ACCEPTED) {
-                int u = step.edge.u, v = step.edge.v;
-                if (u > v) swap(u, v);
-                edgeColors[{u, v}] = Color::Cyan;
+                const Node& u_node = graph.getNodes()[step.edge.u];
+                const Node& v_node = graph.getNodes()[step.edge.v];
+                Vertex line[] = {
+                    Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Cyan),
+                    Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Cyan)
+                };
+                window.draw(line, 2, Lines);
             }
         }
         // Set considering edges yellow
         if (currentStepIndex > 0 && currentStepIndex <= animationSteps.size()) {
             const auto& lastStep = animationSteps[currentStepIndex - 1];
             if (lastStep.action == StepAction::CONSIDERING) {
-                int u = lastStep.edge.u, v = lastStep.edge.v;
-                if (u > v) swap(u, v);
-                edgeColors[{u, v}] = Color::Yellow;
+                const Node& u_node = graph.getNodes()[lastStep.edge.u];
+                const Node& v_node = graph.getNodes()[lastStep.edge.v];
+                Vertex line[] = {
+                    Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Yellow),
+                    Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Yellow)
+                };
+                window.draw(line, 2, Lines);
             }
+        }
+    } else if (currentState == AppState::FINISHED) {
+        // Instant button or animation finished
+        for (const auto& edge: mstResult.mstEdges) {
+            const Node& u_node = graph.getNodes()[edge.u];
+            const Node& v_node = graph.getNodes()[edge.v];
+            Vertex line[] = {
+                Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Cyan),
+                Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Cyan)
+            };
+            window.draw(line, 2, Lines);
         }
     }
 
