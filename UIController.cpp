@@ -524,7 +524,7 @@ void UIController::render() {
         float rightPanelWidth = 1600 - 350;
         float centerX = rightPanelX + rightPanelWidth / 2.0f;
 
-        // Draw title
+        // Draw title in the middle
         string statusMsg = "Large Scale Mode (" + to_string(graph.getNumNodes()) + " nodes)\n";
         if (currentState == AppState::GRAPH_GENERATED) {
             statusMsg += "Graph generated. Ready to run algorithms.\nVisualization disabled for performance.";
