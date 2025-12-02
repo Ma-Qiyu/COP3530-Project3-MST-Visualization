@@ -382,7 +382,7 @@ void UIController::render() {
             }
         }
     } else if (currentState == AppState::FINISHED) {
-        // Instant button or animation finished
+        // Instant button or animation finished.
         for (const auto& edge: mstResult.mstEdges) {
             const Node& u_node = graph.getNodes()[edge.u];
             const Node& v_node = graph.getNodes()[edge.v];
