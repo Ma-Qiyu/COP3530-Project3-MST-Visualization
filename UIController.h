@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Graph.h"
 #include "MSTBuilder.h"
+#include "TextInputBox.h"
 
 using namespace std;
 using namespace sf;
@@ -13,6 +14,10 @@ enum class AppState {
     FINISHED
 };
 
+enum class DisplayMode {
+    VISUALIZATION,
+    DATA_ONLY
+};
 
 class UIController {
 public:
@@ -28,6 +33,7 @@ private:
     Font font;
 
     AppState currentState;
+    DisplayMode currentMode;
     Graph graph;
     MSTBuilder builder;
     MSTResult mstResult;
@@ -46,6 +52,10 @@ private:
     Text settingsTitle;
     RectangleShape generateButton;
     Text generateButtonText;
+    TextInputBox nodeCountInput;
+    Text dataModeMessage;
+    Text edgeListText;
+
 
     // Run algorithm section
     Text runTitle;

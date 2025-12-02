@@ -31,23 +31,28 @@ UIController::UIController()
     settingsTitle.setCharacterSize(22);
     settingsTitle.setPosition(20, 80);
 
-    generateButton.setSize(Vector2f(UI_WIDTH - 40, 50));
-    generateButton.setPosition(20, 120);
+    initTextInputBox(nodeCountInput, font, {20, 120}, {140, 40});
+    nodeCountInput.text.setPosition(30, 122);
+
+    generateButton.setSize(Vector2f(UI_WIDTH - 40 - 150, 40));
+    generateButton.setPosition(170, 120);
     generateButton.setFillColor(Color(80, 80, 80));
     generateButtonText.setFont(font);
     generateButtonText.setString("Generate Graph");
-    generateButtonText.setCharacterSize(20);
-    generateButtonText.setPosition(generateButton.getPosition() + Vector2f(85, 12));
+    generateButtonText.setCharacterSize(18);
+    FloatRect textBounds = generateButtonText.getLocalBounds();
+    generateButtonText.setOrigin(textBounds.left + textBounds.width / 2.f, textBounds.top + textBounds.height / 2.f);
+    generateButtonText.setPosition(generateButton.getPosition() + (generateButton.getSize() / 2.f));
 
     // --- Run Algorithms Section ---
     runTitle.setFont(font);
     runTitle.setString("Run Algorithms");
     runTitle.setCharacterSize(22);
-    runTitle.setPosition(20, 200);
+    runTitle.setPosition(20, 190);
 
     // Kruskal Batch Buttons
     kruskalBatchButton.setSize(Vector2f(UI_WIDTH - 40, 40));
-    kruskalBatchButton.setPosition(20, 240);
+    kruskalBatchButton.setPosition(20, 230);
     kruskalBatchButton.setFillColor(Color(80, 80, 80));
     kruskalBatchButtonText.setFont(font);
     kruskalBatchButtonText.setString("Kruskal (Instant)");
@@ -56,7 +61,7 @@ UIController::UIController()
 
     // Kruskal Animate Button
     kruskalAnimateButton.setSize(Vector2f(UI_WIDTH - 40, 40));
-    kruskalAnimateButton.setPosition(20, 290);
+    kruskalAnimateButton.setPosition(20, 280);
     kruskalAnimateButton.setFillColor(Color(80, 80, 80));
     kruskalAnimateButtonText.setFont(font);
     kruskalAnimateButtonText.setString("Kruskal (Animate)");
@@ -65,14 +70,14 @@ UIController::UIController()
 
     // Prim Buttons
     primBatchButton.setSize(Vector2f(UI_WIDTH - 40, 40));
-    primBatchButton.setPosition(20, 340);
+    primBatchButton.setPosition(20, 330);
     primBatchButtonText.setFont(font);
     primBatchButtonText.setString("Prim (Instant)");
     primBatchButtonText.setCharacterSize(18);
     primBatchButtonText.setPosition(primBatchButton.getPosition() + Vector2f(95, 8));
 
     primAnimateButton.setSize(Vector2f(UI_WIDTH - 40, 40));
-    primAnimateButton.setPosition(20, 390);
+    primAnimateButton.setPosition(20, 380);
     primAnimateButtonText.setFont(font);
     primAnimateButtonText.setString("Prim (Animate)");
     primAnimateButtonText.setCharacterSize(18);
@@ -129,6 +134,18 @@ UIController::UIController()
     float initialSliderX = speedSliderBack.getPosition().x + speedSliderBack.getSize().x / 2.f;
     speedSliderHandle.setPosition(initialSliderX, speedSliderBack.getPosition().y + 5);
 
+    // Data Mode Text
+    currentMode = DisplayMode::VISUALIZATION;
+    dataModeMessage.setFont(font);
+    dataModeMessage.setCharacterSize(24);
+    dataModeMessage.setFillColor(Color::White);
+    dataModeMessage.setPosition(400, 50);
+
+    edgeListText.setFont(font);
+    edgeListText.setCharacterSize(16);
+    edgeListText.setFillColor(Color::Cyan);
+    edgeListText.setPosition(400, 150);
+
     isPlaying = false;
     currentStepIndex = 0;
     animationDelaySeconds = 0.05f;
@@ -150,21 +167,54 @@ void UIController::handleEvents() {
             window.close();
         }
 
+        handleTextInput(event, nodeCountInput);
+
         // Mouse click event
         if (event.type == Event::MouseButtonPressed) {
             if (event.mouseButton.button == Mouse::Left) {
                 Vector2f mousePos = window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
 
+                // Check if click the input box
+                if (nodeCountInput.box.getGlobalBounds().contains(mousePos)) {
+                    nodeCountInput.isActive = true;
+                } else {
+                    nodeCountInput.isActive = false;
+                }
+
                 // "Generate Graph" button
                 if (generateButton.getGlobalBounds().contains(mousePos)) {
-                    cout << "Generate Graph button clicked!" << endl;
-                    graph.generateGraph(200, 1600 - 350, 900, GraphBuildStrategy::DELAUNAY, 5);
-                    currentState = AppState::GRAPH_GENERATED;
-                    mstResult = MSTResult();
-                    // When generate new graph, stop and clear old animation
-                    isPlaying = false;
-                    animationSteps.clear();
-                    currentStepIndex = 0;
+                    // Get input
+                    int numNodes = stoi(nodeCountInput.input);
+
+                    // Check range
+                    if (numNodes >= 2 && numNodes <= 100000) {
+                        cout << "Generating graph with " << numNodes << " nodes..." << endl;
+
+                        // Branch into different mode
+                        GraphBuildStrategy strategy;
+
+                        if (numNodes <= 1000) {
+                            // Visualization mode
+                            currentMode = DisplayMode::VISUALIZATION;
+                            strategy = GraphBuildStrategy::DELAUNAY;
+                            cout << "Mode: VISUALIZATION" << endl;
+                        } else {
+                            // Data mode
+                            currentMode = DisplayMode::DATA_ONLY;
+                            strategy = GraphBuildStrategy::K_NEAREST;
+                            cout << "Mode: DATA_ONLY" << endl;
+                        }
+
+                        graph.generateGraph(numNodes, 1600 - 350, 900, strategy, 5); // K=5 for large scale
+                        currentState = AppState::GRAPH_GENERATED;
+                        mstResult = MSTResult();
+                        isPlaying = false;
+                        animationSteps.clear();
+                        currentStepIndex = 0;
+                    } else {
+                        cout << "Invalid input! Please enter 2-100000." << endl;
+                        nodeCountInput.input = "200"; // Default
+                    }
                 }
 
                 // Algorithm and animation controller button
@@ -212,6 +262,7 @@ void UIController::handleEvents() {
                 }
             }
         }
+
         // --- Mouse Button Released ---
         if (event.type == Event::MouseButtonReleased) {
             if (event.mouseButton.button == Mouse::Left) {
@@ -222,7 +273,7 @@ void UIController::handleEvents() {
         // --- Mouse Moved ---
         if (event.type == Event::MouseMoved) {
             if (isDraggingSlider) {
-                // [优化] Only move if dragging
+                // Only move if dragging
                 Vector2f mousePos = window.mapPixelToCoords({event.mouseMove.x, event.mouseMove.y});
                 float newX = max(speedSliderBack.getPosition().x,
                                  min(mousePos.x, speedSliderBack.getPosition().x + speedSliderBack.getSize().x));
@@ -247,8 +298,13 @@ void UIController::update() {
         generateButton.setFillColor(Color(80, 80, 80));
     }
 
+    updateTextInputBox(nodeCountInput, window);
+
     // Only enable these buttons after the graph is generated
-    bool algoButtonsEnabled = (currentState == AppState::GRAPH_GENERATED);
+    bool algoButtonsEnabled = (currentState == AppState::GRAPH_GENERATED || currentState == AppState::FINISHED);
+
+    // Only enable animation buttons when algo buttons enable
+    bool animateEnabled = algoButtonsEnabled && (currentMode == DisplayMode::VISUALIZATION);
 
     // Kruskal and Prim buttons
     if (algoButtonsEnabled) {
@@ -283,6 +339,26 @@ void UIController::update() {
         primBatchButton.setFillColor(Color(60, 60, 60));
         primAnimateButton.setFillColor(Color(60, 60, 60));
     }
+
+    if (animateEnabled) {
+        // Kruskal Animate
+        if (kruskalAnimateButton.getGlobalBounds().contains(mousePos)) {
+            kruskalAnimateButton.setFillColor(Color(100, 100, 100));
+        } else {
+            kruskalAnimateButton.setFillColor(Color(80, 80, 80));
+        }
+        // Prim Animate
+        if (primAnimateButton.getGlobalBounds().contains(mousePos)) {
+            primAnimateButton.setFillColor(Color(100, 100, 100));
+        } else {
+            primAnimateButton.setFillColor(Color(80, 80, 80));
+        }
+    } else {
+        // Disable
+        kruskalAnimateButton.setFillColor(Color(60, 60, 60));
+        primAnimateButton.setFillColor(Color(60, 60, 60));
+    }
+
 
     // Animation logics
     if (currentState == AppState::ANIMATING) {
@@ -338,29 +414,55 @@ void UIController::render() {
 
     // Draw right part: MST building Area
     const int UI_WIDTH = 350;
-    map<pair<int, int>, Color> edgeColors;
+    if (currentMode == DisplayMode::VISUALIZATION) {
+        map<pair<int, int>, Color> edgeColors;
 
-    for (const auto& edgeList: graph.getAdjList()) {
-        for (const auto& edge: edgeList) {
-            if (edge.u < edge.v) {
-                const Node& u = graph.getNodes()[edge.u];
-                const Node& v = graph.getNodes()[edge.v];
-                Vertex line[] = {
-                    Vertex(Vector2f(u.x + UI_WIDTH, u.y), Color(100, 100, 100, 50)),
-                    Vertex(Vector2f(v.x + UI_WIDTH, v.y), Color(100, 100, 100, 50))
-                };
-                window.draw(line, 2, Lines);
+        for (const auto& edgeList: graph.getAdjList()) {
+            for (const auto& edge: edgeList) {
+                if (edge.u < edge.v) {
+                    const Node& u = graph.getNodes()[edge.u];
+                    const Node& v = graph.getNodes()[edge.v];
+                    Vertex line[] = {
+                        Vertex(Vector2f(u.x + UI_WIDTH, u.y), Color(100, 100, 100, 50)),
+                        Vertex(Vector2f(v.x + UI_WIDTH, v.y), Color(100, 100, 100, 50))
+                    };
+                    window.draw(line, 2, Lines);
+                }
             }
         }
-    }
 
-    if (currentState == AppState::ANIMATING) {
-        // Set accepted edges cyan
-        for (size_t i = 0; i < currentStepIndex; ++i) {
-            const auto& step = animationSteps[i];
-            if (step.action == StepAction::ACCEPTED) {
-                const Node& u_node = graph.getNodes()[step.edge.u];
-                const Node& v_node = graph.getNodes()[step.edge.v];
+        if (currentState == AppState::ANIMATING) {
+            // Set accepted edges cyan
+            for (size_t i = 0; i < currentStepIndex; ++i) {
+                const auto& step = animationSteps[i];
+                if (step.action == StepAction::ACCEPTED) {
+                    const Node& u_node = graph.getNodes()[step.edge.u];
+                    const Node& v_node = graph.getNodes()[step.edge.v];
+                    Vertex line[] = {
+                        Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Cyan),
+                        Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Cyan)
+                    };
+                    window.draw(line, 2, Lines);
+                }
+            }
+            // Set considering edges yellow
+            if (currentStepIndex > 0 && currentStepIndex <= animationSteps.size()) {
+                const auto& lastStep = animationSteps[currentStepIndex - 1];
+                if (lastStep.action == StepAction::CONSIDERING) {
+                    const Node& u_node = graph.getNodes()[lastStep.edge.u];
+                    const Node& v_node = graph.getNodes()[lastStep.edge.v];
+                    Vertex line[] = {
+                        Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Yellow),
+                        Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Yellow)
+                    };
+                    window.draw(line, 2, Lines);
+                }
+            }
+        } else if (currentState == AppState::FINISHED) {
+            // Instant button or animation finished.
+            for (const auto& edge: mstResult.mstEdges) {
+                const Node& u_node = graph.getNodes()[edge.u];
+                const Node& v_node = graph.getNodes()[edge.v];
                 Vertex line[] = {
                     Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Cyan),
                     Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Cyan)
@@ -368,62 +470,66 @@ void UIController::render() {
                 window.draw(line, 2, Lines);
             }
         }
-        // Set considering edges yellow
-        if (currentStepIndex > 0 && currentStepIndex <= animationSteps.size()) {
-            const auto& lastStep = animationSteps[currentStepIndex - 1];
-            if (lastStep.action == StepAction::CONSIDERING) {
-                const Node& u_node = graph.getNodes()[lastStep.edge.u];
-                const Node& v_node = graph.getNodes()[lastStep.edge.v];
-                Vertex line[] = {
-                    Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Yellow),
-                    Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Yellow)
-                };
-                window.draw(line, 2, Lines);
-            }
-        }
-    } else if (currentState == AppState::FINISHED) {
-        // Instant button or animation finished.
-        for (const auto& edge: mstResult.mstEdges) {
-            const Node& u_node = graph.getNodes()[edge.u];
-            const Node& v_node = graph.getNodes()[edge.v];
-            Vertex line[] = {
-                Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), Color::Cyan),
-                Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), Color::Cyan)
-            };
-            window.draw(line, 2, Lines);
-        }
-    }
 
-    for (const auto& edgeList: graph.getAdjList()) {
-        for (const auto& edge: edgeList) {
-            if (edge.u < edge.v) {
-                Color color = Color(100, 100, 100, 50); // 默认灰色
-                if (edgeColors.count({edge.u, edge.v})) {
-                    color = edgeColors.at({edge.u, edge.v});
+        for (const auto& edgeList: graph.getAdjList()) {
+            for (const auto& edge: edgeList) {
+                if (edge.u < edge.v) {
+                    Color color = Color(100, 100, 100, 50); // 默认灰色
+                    if (edgeColors.count({edge.u, edge.v})) {
+                        color = edgeColors.at({edge.u, edge.v});
+                    }
+                    const Node& u_node = graph.getNodes()[edge.u];
+                    const Node& v_node = graph.getNodes()[edge.v];
+                    Vertex line[] = {
+                        Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), color),
+                        Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), color)
+                    };
+                    window.draw(line, 2, Lines);
                 }
-                const Node& u_node = graph.getNodes()[edge.u];
-                const Node& v_node = graph.getNodes()[edge.v];
-                Vertex line[] = {
-                    Vertex(Vector2f(u_node.x + UI_WIDTH, u_node.y), color),
-                    Vertex(Vector2f(v_node.x + UI_WIDTH, v_node.y), color)
-                };
-                window.draw(line, 2, Lines);
             }
         }
-    }
 
-    // Draw the nodes
-    CircleShape nodeShape(4.0f);
-    nodeShape.setOrigin(4.f, 4.f);
-    nodeShape.setFillColor(Color::White);
-    for (const auto& node: graph.getNodes()) {
-        nodeShape.setPosition(node.x + UI_WIDTH, node.y);
-        window.draw(nodeShape);
+        // Draw the nodes
+        CircleShape nodeShape(4.0f);
+        nodeShape.setOrigin(4.f, 4.f);
+        nodeShape.setFillColor(Color::White);
+        for (const auto& node: graph.getNodes()) {
+            nodeShape.setPosition(node.x + UI_WIDTH, node.y);
+            window.draw(nodeShape);
+        }
+    } else {
+        string statusMsg = "Large Scale Mode (" + to_string(graph.getNumNodes()) + " nodes)\n";
+        if (currentState == AppState::GRAPH_GENERATED) {
+            statusMsg += "Graph generated. Ready to run algorithms.\nVisualization disabled for performance.";
+        } else if (currentState == AppState::FINISHED) {
+            statusMsg += "Algorithm Completed: " + mstResult.algorithmName;
+        }
+        dataModeMessage.setString(statusMsg);
+        window.draw(dataModeMessage);
+
+
+        if (currentState == AppState::FINISHED) {
+            string edgeStr = "MST Edge List (First 20 edges):\n";
+            int count = 0;
+            for (const auto& edge: mstResult.mstEdges) {
+                edgeStr += "(" + to_string(edge.u) + " - " + to_string(edge.v) + ")  W:" + to_string(
+                            (double) edge.weight)
+                        + "\n";
+                count++;
+                if (count >= 20) {
+                    edgeStr += "... and " + to_string(mstResult.mstEdges.size() - 20) + " more.";
+                    break;
+                }
+            }
+            edgeListText.setString(edgeStr);
+            window.draw(edgeListText);
+        }
     }
 
     // Draw left part: controller
     window.draw(uiPanel);
     window.draw(titleText);
+    drawTextInputBox(window, nodeCountInput);
 
     // Draw settings section
     window.draw(settingsTitle);
