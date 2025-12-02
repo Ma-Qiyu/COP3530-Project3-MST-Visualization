@@ -47,7 +47,7 @@ UIController::UIController()
     generateButtonText.setOrigin(textBounds.left + textBounds.width / 2.f, textBounds.top + textBounds.height / 2.f);
     generateButtonText.setPosition(generateButton.getPosition() + (generateButton.getSize() / 2.f));
 
-    // --- Run Algorithms Section ---
+    // Run Algorithms Section
     runTitle.setFont(font);
     runTitle.setString("Run Algorithms");
     runTitle.setCharacterSize(22);
@@ -93,8 +93,8 @@ UIController::UIController()
     statsTitle.setCharacterSize(22);
     statsTitle.setPosition(20, 460);
     statsTitle.setFillColor(Color(255, 255, 153));
-    int statTextSize = 19; // 从默认值改为 16，更精致
-    int lineSpacing = 25; // 行间距
+    int statTextSize = 19;
+    int lineSpacing = 25;
     int startY = 500;
 
     algorithmText.setFont(font);
