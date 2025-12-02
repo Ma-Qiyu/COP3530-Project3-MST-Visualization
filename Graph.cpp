@@ -19,7 +19,7 @@ void Graph::generateGraph(int numNodes, int canvasWidth, int canvasHeight, Graph
     clear();
     if (numNodes <= 1) return;
 
-    // Generate nodes using Grid Jitter first
+    // Generate nodes using Grid Jitter first.
     generateNodesGridJitter(numNodes, canvasWidth, canvasHeight);
 
     // Choose an edge connection strategy!

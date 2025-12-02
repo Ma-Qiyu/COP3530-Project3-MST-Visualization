@@ -38,9 +38,9 @@ class Graph {
     vector<vector<Edge> > adjList;
 
     // Helper functions for graph generation
-    // Point Generation
+    // Points Generation
     void generateNodesGridJitter(int numNodes, int canvasWidth, int canvasHeight);
-    // Edge Generation
+    // Edges Generation
     void connectEdgesKNearest(int k, int canvasWidth, int canvasHeight);
     void connectEdgesDelaunay();
     void bfs(int startNode, vector<bool>& visited, vector<int>& component);
