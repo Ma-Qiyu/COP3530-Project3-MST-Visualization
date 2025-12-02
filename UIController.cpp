@@ -24,12 +24,15 @@ UIController::UIController()
     titleText.setString("MST VISUALIZATION");
     titleText.setCharacterSize(28);
     titleText.setPosition(20, 20);
+    titleText.setStyle(Text::Bold);
+    titleText.setFillColor(Color::White);
 
     // --- Settings Section ---
     settingsTitle.setFont(font);
     settingsTitle.setString("Settings");
     settingsTitle.setCharacterSize(22);
     settingsTitle.setPosition(20, 80);
+    settingsTitle.setFillColor(Color(135, 206, 250)); // Light Sky Blue
 
     initTextInputBox(nodeCountInput, font, {20, 120}, {140, 40});
     nodeCountInput.text.setPosition(30, 122);
@@ -49,6 +52,7 @@ UIController::UIController()
     runTitle.setString("Run Algorithms");
     runTitle.setCharacterSize(22);
     runTitle.setPosition(20, 190);
+    runTitle.setFillColor(Color(144, 238, 144)); // Light Green
 
     // Kruskal Batch Buttons
     kruskalBatchButton.setSize(Vector2f(UI_WIDTH - 40, 40));
@@ -88,14 +92,30 @@ UIController::UIController()
     statsTitle.setString("Statistics");
     statsTitle.setCharacterSize(22);
     statsTitle.setPosition(20, 460);
+    statsTitle.setFillColor(Color(255, 255, 153));
+    int statTextSize = 19; // 从默认值改为 16，更精致
+    int lineSpacing = 25; // 行间距
+    int startY = 500;
 
     algorithmText.setFont(font);
+    algorithmText.setCharacterSize(statTextSize);
+    algorithmText.setFillColor(Color(220, 220, 220));
     algorithmText.setPosition(20, 500);
+
     weightText.setFont(font);
+    weightText.setCharacterSize(statTextSize);
+    weightText.setFillColor(Color(220, 220, 220));
     weightText.setPosition(20, 530);
+
+
     timeText.setFont(font);
+    timeText.setCharacterSize(statTextSize);
+    timeText.setFillColor(Color(220, 220, 220));
     timeText.setPosition(20, 560);
+
     edgeCountText.setFont(font);
+    edgeCountText.setCharacterSize(statTextSize);
+    edgeCountText.setFillColor(Color(220, 220, 220));
     edgeCountText.setPosition(20, 590);
 
     // Set initial stats text
@@ -108,7 +128,8 @@ UIController::UIController()
     animControlTitle.setFont(font);
     animControlTitle.setString("Animation Control");
     animControlTitle.setCharacterSize(22);
-    animControlTitle.setPosition(20, 650);
+    animControlTitle.setFillColor(Color(221, 160, 221));
+    animControlTitle.setPosition(20, 640);
 
     playPauseButton.setSize(Vector2f(UI_WIDTH - 40, 40));
     playPauseButton.setPosition(20, 690);
@@ -498,30 +519,77 @@ void UIController::render() {
             window.draw(nodeShape);
         }
     } else {
+        // Large scale mode
+        float rightPanelX = 350;
+        float rightPanelWidth = 1600 - 350;
+        float centerX = rightPanelX + rightPanelWidth / 2.0f;
+
+        // Draw title
         string statusMsg = "Large Scale Mode (" + to_string(graph.getNumNodes()) + " nodes)\n";
         if (currentState == AppState::GRAPH_GENERATED) {
             statusMsg += "Graph generated. Ready to run algorithms.\nVisualization disabled for performance.";
         } else if (currentState == AppState::FINISHED) {
             statusMsg += "Algorithm Completed: " + mstResult.algorithmName;
         }
+
         dataModeMessage.setString(statusMsg);
+        dataModeMessage.setCharacterSize(20);
+
+        FloatRect titleBounds = dataModeMessage.getLocalBounds();
+        dataModeMessage.setOrigin(titleBounds.left + titleBounds.width / 2.0f, 0);
+        dataModeMessage.setPosition(centerX, 30);
+
         window.draw(dataModeMessage);
 
-
+        // Show a sample of 100 edges
         if (currentState == AppState::FINISHED) {
-            string edgeStr = "MST Edge List (First 20 edges):\n";
-            int count = 0;
-            for (const auto& edge: mstResult.mstEdges) {
-                edgeStr += "(" + to_string(edge.u) + " - " + to_string(edge.v) + ")  W:" + to_string(
-                            (double) edge.weight)
-                        + "\n";
-                count++;
-                if (count >= 20) {
-                    edgeStr += "... and " + to_string(mstResult.mstEdges.size() - 20) + " more.";
-                    break;
+            string edgeStr = "MST Edge List Sample (First 100 edges):\n";
+            edgeStr += string(110, '-') + "\n";
+            edgeStr += "Idx  (u - v)   W   |  Idx  (u - v)   W   |  Idx  (u - v)   W   |  Idx  (u - v)   W\n";
+            edgeStr += string(110, '-') + "\n";
+
+            int displayLimit = 100;
+            int totalEdges = mstResult.mstEdges.size();
+            int count = min(totalEdges, displayLimit);
+
+            int rows = (count + 3) / 4;
+
+            for (int i = 0; i < rows; ++i) {
+                string line = "";
+
+                for (int col = 0; col < 4; ++col) {
+                    int currentIndex = i + (col * rows);
+
+                    if (currentIndex < count) {
+                        const auto& edge = mstResult.mstEdges[currentIndex];
+
+                        string item = to_string(currentIndex + 1) + ". (" + to_string(edge.u) + "-" + to_string(edge.v)
+                                      + ") " + to_string(edge.weight);
+
+                        if (col < 3) {
+                            while (item.length() < 26) {
+                                item += " ";
+                            }
+                            item += "| ";
+                        }
+                        line += item;
+                    }
                 }
+                edgeStr += line + "\n";
             }
+
+            if (totalEdges > displayLimit) {
+                edgeStr += "\n... and " + to_string(totalEdges - displayLimit) + " more edges not shown.";
+            }
+
             edgeListText.setString(edgeStr);
+            edgeListText.setCharacterSize(14);
+            edgeListText.setLineSpacing(1.3f);
+            FloatRect textBounds = edgeListText.getLocalBounds();
+
+            edgeListText.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top);
+
+            edgeListText.setPosition(centerX, 130);
             window.draw(edgeListText);
         }
     }
