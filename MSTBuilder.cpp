@@ -135,7 +135,7 @@ MSTResult MSTBuilder::runPrim(const Graph& graph) {
         int u = shortestEdge.u;
         int v = shortestEdge.v;
 
-        // Check if form a cycle
+        // Check if it form a cycle
         if (inMST[v]) {
             continue;
         }

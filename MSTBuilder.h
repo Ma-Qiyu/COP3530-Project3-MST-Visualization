@@ -4,7 +4,7 @@
 #include <string>
 using namespace std;
 
-// A struct to hold the results of an MSST algorithm run
+// A struct to hold the results of an MST algorithm run
 struct MSTResult {
     string algorithmName;
     double totalWeight = 0.0;
