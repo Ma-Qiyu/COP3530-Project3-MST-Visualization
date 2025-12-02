@@ -9,7 +9,7 @@ using namespace sf;
 enum class AppState {
     INITIAL,
     GRAPH_GENERATED,
-    BUILDING_MST,
+    ANIMATING,
     FINISHED
 };
 
@@ -32,6 +32,14 @@ private:
     MSTBuilder builder;
     MSTResult mstResult;
 
+    // Animation related
+    vector<AnimationStep> animationSteps;
+    int currentStepIndex;
+    bool isPlaying;
+    float animationDelaySeconds; // Delay between steps
+    Clock stepTimer;
+    bool isDraggingSlider; // For slider
+
     // Initialization section
     RectangleShape uiPanel;
     Text titleText;
@@ -39,12 +47,17 @@ private:
     RectangleShape generateButton;
     Text generateButtonText;
 
-    // Run section
+    // Run algorithm section
     Text runTitle;
-    RectangleShape kruskalButton;
-    Text kruskalButtonText;
-    RectangleShape primButton;
-    Text primButtonText;
+    Text runModeTitle;
+    RectangleShape kruskalBatchButton;
+    Text kruskalBatchButtonText;
+    RectangleShape kruskalAnimateButton;
+    Text kruskalAnimateButtonText;
+    RectangleShape primBatchButton;
+    Text primBatchButtonText;
+    RectangleShape primAnimateButton;
+    Text primAnimateButtonText;
 
     // Statistics section
     Text statsTitle;
@@ -52,4 +65,12 @@ private:
     Text weightText;
     Text timeText;
     Text edgeCountText;
+
+    // Animation control section
+    Text animControlTitle;
+    RectangleShape playPauseButton;
+    Text playPauseButtonText;
+    Text speedSliderText; // Speed slider
+    RectangleShape speedSliderBack;
+    RectangleShape speedSliderHandle;
 };
