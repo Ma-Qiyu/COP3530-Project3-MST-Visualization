@@ -35,6 +35,7 @@ void handleTextInput(Event& event, TextInputBox& tbox) {
 }
 
 void updateTextInputBox(TextInputBox& tbox, const RenderWindow& window) {
+    tbox.text.setString(tbox.input);
     // Check if activated
     if (tbox.isActive) {
         tbox.box.setOutlineColor(Color::White);
