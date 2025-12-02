@@ -61,7 +61,7 @@ void Graph::generateNodesGridJitter(int numNodes, int canvasWidth, int canvasHei
     random_device rd;
     mt19937 gen(rd());
     // We let the range of jitter to cover 80% of the area centered on the cell
-    uniform_real_distribution<> distrib(0.1, 0.9);
+    uniform_real_distribution<> distrib(0.15, 0.85);
 
     nodes.reserve(numNodes);
     int nodeId = 0;
