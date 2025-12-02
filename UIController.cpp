@@ -27,7 +27,7 @@ UIController::UIController()
     titleText.setStyle(Text::Bold);
     titleText.setFillColor(Color::White);
 
-    // --- Settings Section ---
+    // Settings Section
     settingsTitle.setFont(font);
     settingsTitle.setString("Settings");
     settingsTitle.setCharacterSize(22);
