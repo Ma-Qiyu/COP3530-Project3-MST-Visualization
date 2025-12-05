@@ -8,7 +8,7 @@ animation.
 
 ## How to Run Code
 
-This project requires a **C++17 compiler**（GCC, Clang, or MSVC）, and the **SFML** (Simple and Fast Multimedia Library)
+This project requires a **C++17 compiler**(GCC, Clang, or MSVC), and the **SFML** (Simple and Fast Multimedia Library)
 development
 libraries (Version 2.5+).
 
