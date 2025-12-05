@@ -22,6 +22,7 @@ libraries (Version 2.5+).
 
 ```angular2html
 git clone https://github.com/Ma-Qiyu/COP3530-Project3-MST-Visualization.git
+
 cd COP3530-Project3-MST-Visualization
 ```
 
