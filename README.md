@@ -32,7 +32,7 @@ cd COP3530-Project3-MST-Visualization
 
 ```angular2html
 # Compile
-g++ -std=c++17 -Wall -I./lib -I/opt/homebrew/include -L/opt/homebrew/lib main.cpp Graph.cpp MSTBuilder.cpp TextInputBox.cpp UIController.cpp -o COP3530_Final_Project_MST -lsfml-graphics -lsfml-window -lsfml-system
+g++ -std=c++17 -Wall -I. -I/opt/homebrew/include -L/opt/homebrew/lib main.cpp Graph.cpp MSTBuilder.cpp TextInputBox.cpp UIController.cpp -o COP3530_Final_Project_MST -lsfml-graphics -lsfml-window -lsfml-system
 
 # Copy font file
 cp lib/Roboto-Regular.ttf font.ttf
@@ -45,7 +45,7 @@ cp lib/Roboto-Regular.ttf font.ttf
 
 ```angular2html
 # Compile
-g++ -std=c++17 -Wall -I./lib main.cpp Graph.cpp MSTBuilder.cpp TextInputBox.cpp UIController.cpp -o COP3530_Final_Project_MST.exe -lsfml-graphics -lsfml-window -lsfml-system
+g++ -std=c++17 -Wall -I. main.cpp Graph.cpp MSTBuilder.cpp TextInputBox.cpp UIController.cpp -o COP3530_Final_Project_MST.exe -lsfml-graphics -lsfml-window -lsfml-system
 
 # Copy font file
 copy lib\Roboto-Regular.ttf font.ttf
@@ -58,21 +58,23 @@ copy lib\Roboto-Regular.ttf font.ttf
 
 ```angular2html
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -I./lib
+CXXFLAGS = -std=c++17 -Wall -I.
 LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 
 SOURCES = main.cpp Graph.cpp MSTBuilder.cpp TextInputBox.cpp UIController.cpp
-TARGET = COP3530_Final_Project_MST.exe
+TARGET = COP3530_Final_Project_MST
 
-all: $(TARGET)
+all: $(TARGET) copy_font
 
 $(TARGET): $(SOURCES)
 $(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET) $(LDFLAGS)
 
+copy_font:
+cp lib/Roboto-Regular.ttf font.ttf
+
 clean:
-del $(TARGET)
+rm -f $(TARGET) font.ttf
 
 run: $(TARGET)
-.\$(TARGET)
-
+./$(TARGET)
 ```
