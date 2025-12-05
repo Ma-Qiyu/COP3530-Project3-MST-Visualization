@@ -16,7 +16,7 @@ libraries (Version 2.5+).
 
 * **MacOS (Homebrew):** `brew install sfml`
 * **Linux (Debian/Ubuntu):** `sudo apt-get install libsfml-dev build-essential`
-* **Windows:** Download precompiled binaries from [SFML Downloads](https://www.sfml-dev.org/download.php)
+* **Windows:** Download from [SFML Downloads](https://www.sfml-dev.org/download.php)
 
 ### Clone the Repository
 
