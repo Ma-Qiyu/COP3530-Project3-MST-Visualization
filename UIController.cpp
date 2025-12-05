@@ -564,7 +564,7 @@ void UIController::render() {
                         const auto& edge = mstResult.mstEdges[currentIndex];
 
                         string item = to_string(currentIndex + 1) + ". (" + to_string(edge.u) + "-" + to_string(edge.v)
-                                      + ") " + to_string(edge.weight);
+                                      + ") " + to_string((double) edge.weight);
 
                         if (col < 3) {
                             while (item.length() < 26) {
